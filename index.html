@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaporWarga - Aplikasi Pelaporan Fasilitas Umum</title>
+    <style>
+        /* CSS UTAMA UNTUK TAMPILAN */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f0f8ff;
+        }
+
+        /* NOTIFIKASI JARINGAN */
+        #network-notif {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        /* HALAMAN LOGIN */
+        #login-page {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #login-page img {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+
+        #login-page h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #login-page input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #login-page button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* HALAMAN UTAMA */
+        #main-app {
+            display: none;
+        }
+
+        /* NAVIGASI BAWAH */
+        #bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+
+        #bottom-nav button {
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #777;
+            cursor: pointer;
+        }
+
+        #bottom-nav button.active {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* HALAMAN BERANDA */
+        .page {
+            display: none;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        #home-page h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #map-area {
+            width: 100%;
+            height: 300px;
+            background-color: #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #map-area p {
+            color: #777;
+            text-align: center;
+        }
+
+        #fab-button {
+            position: fixed;
+            right: 20px;
+            bottom: 80px;
+            width: 50px;
+            height: 50px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* FORM LAPORAN */
+        #report-page h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #photo-preview {
+            width: 100%;
+            height: 200px;
+            background-color: #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+        }
+
+        #photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #report-page input, #report-page select, #report-page textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #report-page button {
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #submit-btn {
+            background-color: #3498db !important;
+        }
+
+        /* RIWAYAT LAPORAN */
+        #history-page h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #report-list {
+            margin-top: 20px;
+        }
+
+        .report-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .report-item h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .report-item p {
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- NOTIFIKASI JARINGAN -->
+    <div id="network-notif">⚠️ Jaringan Terputus!</div>
+
+    <!-- HALAMAN LOGIN -->
+    <div id="login-page">
+        <img src="https://cdn-icons-png.flaticon.com/512/2059/2059827.png" alt="Logo LaporWarga">
+        <h1>LAPORWARGA</h1>
+        <p>Masukkan nama kamu untuk melanjutkan</p>
+        <input type="text" id="username" placeholder="Nama kamu">
+        <button onclick="login()">MASUK</button>
+    </div>
+
+    <!-- APLIKASI UTAMA -->
+    <div id="main-app" style="display: none;">
+        <!-- NAVIGASI BAWAH -->
+        <div id="bottom-nav">
+            <button onclick="openPage('home-page')" class="active">Beranda</button>
+            <button onclick="openPage('history-page')">Riwayat</button>
+        </div>
+
+        <!-- HALAMAN BERANDA -->
+        <div id="home-page" class="page active">
+            <h2>📍 Lokasi Kamu</h2>
+            <div id="map-area">
+                <p>Memuat Peta...<br>Koneksi aktif akan munculkan peta Google Maps</p>
+            </div>
+            <button id="fab-button" onclick="openPage('report-page')">+</button>
+        </div>
+
+        <!-- HALAMAN FORM LAPORAN -->
+        <div id="report-page" class="page">
+            <h2>📝 Buat Laporan Baru</h2>
+            <div id="photo-preview">
+                <p>Klik tombol di bawah untuk pilih foto</p>
+            </div>
+            <input type="file" id="photo-upload" accept="image/*" style="display: none;" onchange="previewPhoto(event)">
+            <button onclick="document.getElementById('photo-upload').click()">📸 Pilih Foto</button>
+            
+            <input type="text" id="street-name" placeholder="Nama Jalan / Tempat">
+            <select id="report-category">
+                <option value="">Pilih Kategori Kerusakan</option>
+                <option value="Jalan Berlubang">Jalan Berlubang</option>
+                <option value="Lampu Jalan Mati">Lampu Jalan Mati</option>
+                <option value="Tumpukan Sampah">Tumpukan Sampah</option>
+                <option value="Trotoar Rusak">Trotoar Rusak</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
+            <textarea id="report-desc" placeholder="Keterangan Tambahan"></textarea>
+            
+            <button id="submit-btn" onclick="submitReport()">📤 Kirim Laporan</button>
+            <button onclick="openPage('home-page')">❌ Batal</button>
+        </div>
+
+        <!-- HALAMAN RIWAYAT LAPORAN -->
+        <div id="history-page" class="page">
+            <h2>📋 Riwayat Laporan</h2>
+            <div id="report-list">
+                <p>Belum ada laporan yang dibuat</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PENYIMPANAN DATA
+        let reports = JSON.parse(localStorage.getItem('laporWargaReports')) || [];
+        let currentUser = localStorage.getItem('laporWargaUser') || '';
+
+        // CEK LOGIN
+        if (currentUser) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            loadMap();
+        }
+
+        // FUNGSI LOGIN
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('Masukkan nama kamu dulu ya!');
+                return;
+            }
+            localStorage.setItem('laporWargaUser', username);
+            currentUser = username;
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            loadMap();
+        }
+
+        // FUNGSI MUAT PETA
+        function loadMap() {
+            const mapArea = document.getElementById('map-area');
+            mapArea.innerHTML = `
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.383348815657!2d110.36935939999999!3d-7.7657491!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a59982702c85b%3A0x1a5808a0a1a1a1a1!2sJalan%20Merdeka%2C%20Yogyakarta!5e0!3m2!1sid!2sid!4v1699999999999!5m2!1sid!2sid" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
+            `;
+        }
+
+        // FUNGSI NAVIGASI HALAMAN
+        function openPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // HAPUS AKTIF DARI NAVIGASI
+            const navButtons = document.querySelectorAll('#bottom-nav button');
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            event?.target.classList.add('active');
+        }
+
+        // FUNGSI PREVIEW FOTO
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photo-preview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Foto Laporan">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // FUNGSI KIRIM LAPORAN
+        function submitReport() {
+            const street = document.getElementById('street-name').value.trim();
+            const category = document.getElementById('report-category').value;
+            const desc = document.getElementById('report-desc').value.trim();
+            const photo = document.getElementById('photo-upload').files[0];
+
+            if (!street || !category || !photo) {
+                alert('Isi semua data dan pilih foto dulu ya!');
+                return;
+            }
+
+            // SIMULASI PROSES UPLOAD
+            alert('Sedang mengirim laporan... ⏳');
+            
+            setTimeout(() => {
+                const newReport = {
+                    id: Date.now(),
+                    street: street,
+                    category: category,
+                    description: desc,
+                    date: new Date().toLocaleString('id-ID'),
+                    photo: URL.createObjectURL(photo)
+                };
+
+                reports.push(newReport);
+                localStorage.setItem('laporWargaReports', JSON.stringify(reports));
+                
+                alert('✅ Laporan Diterima! Terima kasih sudah membantu kota kita');
+                openPage('home-page');
+                loadReports();
+            }, 3000); // TUNGGU 3 DETIK
+        }
+
+        // FUNGSI MUAT RIWAYAT LAPORAN
+        function loadReports() {
+            const reportList = document.getElementById('report-list');
+            reports = JSON.parse(localStorage.getItem('laporWargaReports')) || [];
+            
+            if (reports.length === 0) {
+                reportList.innerHTML = '<p>Belum ada laporan yang dibuat</p>';
+                return;
+            }
+
+            reportList.innerHTML = '';
+            reports.forEach(report => {
+                const item = document.createElement('div');
+                item.className = 'report-item';
+                item.innerHTML = `
+                    <h3>${report.category}</h3>
+                    <p>Jalan: ${report.street}</p>
+                    <p>Tanggal: ${report.date}</p>
+                `;
+                reportList.appendChild(item);
+            });
+        }
+
+        // PEMANTAU KONEKSI JARINGAN
+        window.addEventListener('online', () => {
+            document.getElementById('network-notif').style.display = 'none';
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('network-notif').style.display = 'block';
+        });
+
+        // MUAT RIWAYAT SAAT MEMBUKA APLIKASI
+        window.onload = function() {
+            loadReports();
+            if (currentUser) {
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                loadMap();
+            }
+        }
+    </script>
+</body>
+</html>
+
